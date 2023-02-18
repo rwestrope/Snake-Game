@@ -1,10 +1,12 @@
 # Import the Turtle Graphics module
 import turtle
+import random
 
 # Define program constants
 WIDTH = 500
 HEIGHT = 500
 DELAY = 100
+FOOD_SIZE = 10
 
 offsets = {
     "up": (0, 20),
@@ -48,6 +50,9 @@ def game_loop():
 
         snake.append(new_head)
 
+        if not food_collision():
+            snake.pop(0) #snake stays same length if no food collision 
+
         snake.pop(0)
 
         for segment in snake:
@@ -57,6 +62,25 @@ def game_loop():
         screen.update()
 
         turtle.ontimer(game_loop, DELAY)
+
+def get_distance(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+    distance = ((y2 - y1)**2 + (x2 - x1)**2)**0.5 #Pythagorean theorem
+    return distance
+
+def food_collision():
+    global food_pos
+    if get_distance(snake[-1], food_pos) < 20:
+        food_pos = get_random_food_pos
+        food.goto(food_pos)
+        return True
+    return False
+
+def get_random_food_pos():
+    x = random.randint(-WIDTH/2 + FOOD_SIZE, WIDTH/2 - FOOD_SIZE)
+    y = random.randint(-HEIGHT/2 + FOOD_SIZE, HEIGHT/2 - FOOD_SIZE)
+    return (x, y)
 
 # Create a window where we will do our drawing.
 screen = turtle.Screen()
@@ -86,6 +110,14 @@ snake_direction = "up"
 for segment in snake:
     stamper.goto(segment[0], segment[1])
     stamper.stamp()
+
+food = turtle.Turtle()
+food.shape("circle")
+food.color("red")
+food.shapesize(FOOD_SIZE/20)
+food.penup()
+food_pos = get_random_food_pos()
+food.goto(food_pos)
 
 game_loop()
 
